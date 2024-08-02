@@ -2,12 +2,14 @@
 
 This is a simple benchmark for several javascript frameworks. The benchmarks creates a large table with randomized entries and measures the time for various operations including rendering duration.
 
+This is a benchmark for rjs. please see https://github.com/peterhpchen/js-framework-benchmark/tree/release/frameworks/keyed/vue-rjs
+
 ![Screenshot](images/screenshot.png?raw=true "Screenshot")
 
 ## Security advice
 
 Currently there are 186 implemenations in this repository. It's of course impossible for me to make a security assessment
-for all those implementations. `npm ci` and `npm install` can execute arbitraty commands, so they should be executed only for packages you trust. Consequently I build on a dedicated virtual private linux server such that I don't have to install the packages for all those implemenations on my laptop. There's a prebuild build.zip for each chrome release you can download such that you can avoid installing the packages from all implementations. 
+for all those implementations. `npm ci` and `npm install` can execute arbitraty commands, so they should be executed only for packages you trust. Consequently I build on a dedicated virtual private linux server such that I don't have to install the packages for all those implemenations on my laptop. There's a prebuild build.zip for each chrome release you can download such that you can avoid installing the packages from all implementations.
 (I don't know of any (attempted) case for malicious packages in this repository, so please take it just as a general warning.)
 
 The server implemenation in this repository should only be started on your local machine and access should be restricted to your local machine. I recommend against starting the server such that it can be publically accessed from the internet.
@@ -53,7 +55,7 @@ results might be for mixed browser versions, number of runs per benchmark may va
 
 ## Keyed vs non-keyed frameworks
 
-Some frameworks like React, Vue.js or Angular, allow you to create a 1:1 relationship between a data item and a DOM node by assigning a “key” attribute (or for Angular, specifying “trackBy” in *ngFor). If you use some identifier of the data as the key, you get the “keyed” mode. Any update to the data will update the associated DOM node. If you reorder the list, the DOM nodes will be reordered accordingly.
+Some frameworks like React, Vue.js or Angular, allow you to create a 1:1 relationship between a data item and a DOM node by assigning a “key” attribute (or for Angular, specifying “trackBy” in \*ngFor). If you use some identifier of the data as the key, you get the “keyed” mode. Any update to the data will update the associated DOM node. If you reorder the list, the DOM nodes will be reordered accordingly.
 
 The other mode is “non-keyed” and this is what e.g. vue.js uses by default for lists. In this mode, a change to the data items can modify DOM nodes that were associated with other data before. This can be more performant, since costly DOM operations can be avoided (e.g. first removing old nodes and then adding new nodes) and the existing DOM nodes are updated to display the new data. For React and Angular, using the item index as the key uses “non-keyed” mode for those frameworks.
 
@@ -79,41 +81,49 @@ v20.9.0
 ```
 
 ## 1.2 Downloading the pre-built binaries and starting the server
+
 building all frameworks can be challenging. There's a new way that allows to skip that and just run the benchmark without builiding all implementations.
 
-
 Start with checking out a tagged release like that. Pick the release that you want (e.g. chrome 100):
+
 ```
 git clone https://github.com/krausest/js-framework-benchmark.git
 cd js-framework-benchmark
 git checkout chrome100 -b release
 npm ci && npm run install-local
 ```
+
 Download the build.zip for that release from https://github.com/krausest/js-framework-benchmark/releases
 and put the build.zip into the js-framework-benchmark directory and unzip the prebuilt files:
+
 ```
 unzip build.zip
 ```
+
 You're now ready to start the http-server. Let the server run in the background
+
 ```
 npm start
 ```
+
 ## 1.3 Running the benchmarks and handling errors
 
 In a new console window you can now run the benchmarks:
+
 ```
 npm run bench
 ```
 
 This will take some time (currently about 12 hours on my machine). Finally create the results table:
+
 ```
 npm run results
 ```
 
 Open js-framework-benchmark/webdriver-ts-results/table.html in a browser and take a look at the results. You can open the result table with the link [http://localhost:8080/webdriver-ts-results/dist/index.html](http://localhost:8080/webdriver-ts-results/dist/index.html)
 
-
 Here's what you should do when the benchmark run was not successful. Let's assume the benchmark printed the following to the console:
+
 ```
 ================================
 The following benchmarks failed:
@@ -121,14 +131,17 @@ The following benchmarks failed:
 Executing frameworks/non-keyed/ef-js and benchmark 04_select1k failed: No paint event found
 run was not completely successful Benchmarking failed with errors
 ```
+
 You'll now have to run the benchmark again for those that failed like that:
+
 ```
 npm run bench -- --framework non-keyed/ef-js --benchmark 04_
 ```
+
 The you can then continue with creating the results table `npm run results`.
 Another workaround is to delete the folders of frameworks you can't run or you are not interested in.
 
-# 2 The old and hard way: Building the frameworks and running the benchmark 
+# 2 The old and hard way: Building the frameworks and running the benchmark
 
 ## 2.1 Prerequisites
 
@@ -159,7 +172,9 @@ This installs just a few top level dependencies for the building the frameworks 
 ```
 npm ci
 ```
+
 Then install the server:
+
 ```
 npm run install-server
 ```
@@ -290,7 +305,7 @@ cd ..
 npm run rebuild-all
 ```
 
-After downloading the whole internet it starts building it. Basically there should be no errors during the build, but I can't guarantee that the dependencies won't break. 
+After downloading the whole internet it starts building it. Basically there should be no errors during the build, but I can't guarantee that the dependencies won't break.
 
 You can now run the benchmark for all frameworks by invoking:
 
@@ -317,141 +332,110 @@ After that you can check all results in [http://localhost:8080/webdriver-ts/tabl
 ## 4. Contributing a new implementation
 
 ## 4.1 Example instructions for a real implementation
+
 Thanks @dsvorc41 for providing the following description:
 TL;DR:
 ![demo](https://github.com/dsvorc41/js-framework-benchmark/assets/20287188/91ae2d64-7362-4be8-b88f-e52637b33fa5)
 
 1. Install all of the root-level dependencies
-    1. `cd js-framework-benchmark/`
-    1. `npm ci` or `npm i`
-    1. `npm run install-local`
+   1. `cd js-framework-benchmark/`
+   1. `npm ci` or `npm i`
+   1. `npm run install-local`
 2. Make a new directory for your desired framework, for example Fast framework: `mkdir /frameworks/keyed/fast`
 3. Set up your new directory in whatever way is appropriate for that framework, for example:
-    1. Set up prettier, eslint, dependencies (i.e. `@microsoft/fast-element`) etc
-    2. Create `index.html` in the root of your folder where your app will be served `touch /frameworks/keyed/fast/index.html`
-    3. Note: your html file must use the global CSS styles `<link href="/css/currentStyle.css" rel="stylesheet" />`
-4.  Serve the page - Test that your html page is loaded properly in the browser
-    1. For example put `<h1>Hello World - Fast Framework</h1>` somewhere
-    2. Run the server from the root directory: `npm start`
-    3. Visit your page in the browser (URL follows the folder structure): `http://localhost:8080/frameworks/keyed/fast/index.html`
-    4. Note: Its important to always start the server from the root, because that way you'll get access to global CSS that all apps must share
-    5. Note 2: **AVOID SHADOW DOM** - if your framework relies on Shadow Dom (like Fast framework does), you should turn it off. Otherwise you won't get access to global CSS.
+   1. Set up prettier, eslint, dependencies (i.e. `@microsoft/fast-element`) etc
+   2. Create `index.html` in the root of your folder where your app will be served `touch /frameworks/keyed/fast/index.html`
+   3. Note: your html file must use the global CSS styles `<link href="/css/currentStyle.css" rel="stylesheet" />`
+4. Serve the page - Test that your html page is loaded properly in the browser
+   1. For example put `<h1>Hello World - Fast Framework</h1>` somewhere
+   2. Run the server from the root directory: `npm start`
+   3. Visit your page in the browser (URL follows the folder structure): `http://localhost:8080/frameworks/keyed/fast/index.html`
+   4. Note: Its important to always start the server from the root, because that way you'll get access to global CSS that all apps must share
+   5. Note 2: **AVOID SHADOW DOM** - if your framework relies on Shadow Dom (like Fast framework does), you should turn it off. Otherwise you won't get access to global CSS.
 5. Add the "action triggers" - buttons that all apps must have (see `frameworks/keyed/vanillajs/index.html`)
-   1. Note: Action triggers are simply buttons that are used to run the benchmarks (adding rows, deleting rows, swapping them, etc). Those buttons can be static HTML, or you can render them dynamically (with JS) with your framework of choice 
+   1. Note: Action triggers are simply buttons that are used to run the benchmarks (adding rows, deleting rows, swapping them, etc). Those buttons can be static HTML, or you can render them dynamically (with JS) with your framework of choice
    2. Make sure your HTML elements have the same classes and structure as VanillaJS, otherwise benchmarks won't be able to find your elements on the page, and you will not get the global CSS (Bootstrap)
    3. Add the html example below and open the page. You should see nicely formatted elements on the page, like in the GIF image above.
    4. Example for action triggers
       ```html
-          <body>
-            <div id="main">
-              <div class="container">
-                <div class="jumbotron">
+      <body>
+        <div id="main">
+          <div class="container">
+            <div class="jumbotron">
+              <div class="row">
+                <div class="col-md-6">
+                  <h1>VanillaJS-"keyed"</h1>
+                </div>
+                <div class="col-md-6">
                   <div class="row">
-                    <div class="col-md-6">
-                      <h1>VanillaJS-"keyed"</h1>
+                    <div class="col-sm-6 smallpad">
+                      <button type="button" class="btn btn-primary btn-block" id="run">Create 1,000 rows</button>
                     </div>
-                    <div class="col-md-6">
-                      <div class="row">
-                        <div class="col-sm-6 smallpad">
-                          <button
-                            type="button"
-                            class="btn btn-primary btn-block"
-                            id="run"
-                          >
-                            Create 1,000 rows
-                          </button>
-                        </div>
-                        <div class="col-sm-6 smallpad">
-                          <button
-                            type="button"
-                            class="btn btn-primary btn-block"
-                            id="runlots"
-                          >
-                            Create 10,000 rows
-                          </button>
-                        </div>
-                        <div class="col-sm-6 smallpad">
-                          <button
-                            type="button"
-                            class="btn btn-primary btn-block"
-                            id="add"
-                          >
-                            Append 1,000 rows
-                          </button>
-                        </div>
-                        <div class="col-sm-6 smallpad">
-                          <button
-                            type="button"
-                            class="btn btn-primary btn-block"
-                            id="update"
-                          >
-                            Update every 10th row
-                          </button>
-                        </div>
-                        <div class="col-sm-6 smallpad">
-                          <button
-                            type="button"
-                            class="btn btn-primary btn-block"
-                            id="clear"
-                          >
-                            Clear
-                          </button>
-                        </div>
-                        <div class="col-sm-6 smallpad">
-                          <button
-                            type="button"
-                            class="btn btn-primary btn-block"
-                            id="swaprows"
-                          >
-                            Swap Rows
-                          </button>
-                        </div>
-                      </div>
+                    <div class="col-sm-6 smallpad">
+                      <button type="button" class="btn btn-primary btn-block" id="runlots">Create 10,000 rows</button>
+                    </div>
+                    <div class="col-sm-6 smallpad">
+                      <button type="button" class="btn btn-primary btn-block" id="add">Append 1,000 rows</button>
+                    </div>
+                    <div class="col-sm-6 smallpad">
+                      <button type="button" class="btn btn-primary btn-block" id="update">Update every 10th row</button>
+                    </div>
+                    <div class="col-sm-6 smallpad">
+                      <button type="button" class="btn btn-primary btn-block" id="clear">Clear</button>
+                    </div>
+                    <div class="col-sm-6 smallpad">
+                      <button type="button" class="btn btn-primary btn-block" id="swaprows">Swap Rows</button>
                     </div>
                   </div>
                 </div>
-                <table class="table table-hover table-striped test-data"> 
-                  <!-- your dynamic content should render here --> 
-                </table>
               </div>
             </div>
-          </body>
+            <table class="table table-hover table-striped test-data">
+              <!-- your dynamic content should render here -->
+            </table>
+          </div>
+        </div>
+      </body>
       ```
 6. Generate dummy data for rendering
    1. See `frameworks/keyed/fast/src/utils/build-dummy-data.ts` as an example
    2. Note: `id` is an important attribute and it must be initialized as `1`, and continuously incremented. The only time `id` resets back to `1` is when the page reloads - otherwise it should just keep incrementing each time a new row is created. Doing anything else will cause errors when benchmarks try to find elements with specific IDs. Trust me, I learned the hard way.
 7. . Your app needs to support several actions that correspond to "Action triggers" listed above. Here's an example from Fast framework `frameworks\keyed\fast\src\App.ts` and `frameworks\keyed\fast\src\components\Table.ts`:
-   1. Code example:
-      ```typescript
-        export class BenchmarkApp extends FASTElement {
-          createOneThousandRows() {}
-          createTenThousandRows() {}
-          appendOneThousandRows() {}
-          updateEveryTenthRowLabel() {}
-          deleteAllRows() {}
-          swapTwoRows() {}
-          deleteSingleRow(rowId: number) {}
-        }
 
-        export class Table extends FASTElement {
-          selectRow(rowId: number) {}
-        }
+   1. Code example:
+
+      ```typescript
+      export class BenchmarkApp extends FASTElement {
+        createOneThousandRows() {}
+        createTenThousandRows() {}
+        appendOneThousandRows() {}
+        updateEveryTenthRowLabel() {}
+        deleteAllRows() {}
+        swapTwoRows() {}
+        deleteSingleRow(rowId: number) {}
+      }
+
+      export class Table extends FASTElement {
+        selectRow(rowId: number) {}
+      }
       ```
-    2. Note: your app doesn't need methods with the same name - you should write idiomatic code and follow the best practices of your framework of choice. The example above is just to give you an idea of which operations must be supported, but how you choose to implement those methods can be very different from one framework to the next. 
+
+   2. Note: your app doesn't need methods with the same name - you should write idiomatic code and follow the best practices of your framework of choice. The example above is just to give you an idea of which operations must be supported, but how you choose to implement those methods can be very different from one framework to the next.
+
 8. Manually testing your app - do this before you run the benchmarks
-   1. Open your page and click on the buttons, make sure your app adds 1000 rows, then removes them, or swaps them, or adds/removes 10,000 rows. 
+   1. Open your page and click on the buttons, make sure your app adds 1000 rows, then removes them, or swaps them, or adds/removes 10,000 rows.
    2. To do this, you'll probably need to watch your local files and compile them into some sort of a bundle, like `frameworks\keyed\fast\dist\bundle.js` which will be loaded through a script tag in your HTML file
-   3. For example, in Fast folder we have webpack watching our files: ` "dev": "rimraf dist && webpack --config webpack.config.js --watch --mode=development",` 
+   3. For example, in Fast folder we have webpack watching our files: ` "dev": "rimraf dist && webpack --config webpack.config.js --watch --mode=development",`
    4. That means we have two terminal tabs running
       1. One for the server from the root folder `npm start`
       2. And another in our local folder where webpack is watching the files
 9. Run the single benchmark for your framework
-   1.  Once you manually verified that everything works as expected, run a single benchmark and make sure all of the tests are running
-   2.  If you forgot something, one of the benchmarks will probably fail - for example it won't be able to find an element on the page or similar
-   3.  Keep the server in the root folder running `npm start`, and in another terminal tab, also from the root folder run `npm run bench -- --framework keyed/fast` (or whatever is your framework `keyed/react`, `keyed/angular`, etc.).
-   4.  The benchmark runner will open and close Chrome multiple times. The whole thing will take a couple of minutes.
+   1. Once you manually verified that everything works as expected, run a single benchmark and make sure all of the tests are running
+   2. If you forgot something, one of the benchmarks will probably fail - for example it won't be able to find an element on the page or similar
+   3. Keep the server in the root folder running `npm start`, and in another terminal tab, also from the root folder run `npm run bench -- --framework keyed/fast` (or whatever is your framework `keyed/react`, `keyed/angular`, etc.).
+   4. The benchmark runner will open and close Chrome multiple times. The whole thing will take a couple of minutes.
 10. Optional: run the benchmark for VanillaJS as comparison
-    1.  ` npm run bench -- --framework keyed/vanillajs`
+    1. ` npm run bench -- --framework keyed/vanillajs`
 11. Build the report
     1. `npm run results`
 12. Open the report in your browser (NOTE: the server must still be running if you want to see this page)
@@ -521,8 +505,6 @@ You can set an optional different URL if needed or specify that your DOM uses a 
 
 Please take a look at https://github.com/krausest/js-framework-benchmark/wiki/Process-for-merging-a-pull-request for informations how pull requests are merged.
 
-
-
 Contributions are very welcome. Please use the following rules:
 
 - Name your directory frameworks/[keyed|non-keyed]/[FrameworkName]
@@ -534,7 +516,7 @@ Contributions are very welcome. Please use the following rules:
 - Webdriver-ts must be able to run the perf tests for the contribution. This means that all buttons (like "Create 1,000 rows") must have the correct id e.g. like in vanillajs. Using shadow DOM is a real pain for webdriver. The closer you can get to polymer the higher the chances I can make that contribution work.
 - Don't change the ids in the index.html, since the automated benchmarking relies on those ids.
 - Please push only files in your framework folder (not index.html or results.json)
-- **Please make sure your implementation is validated by the test tool.** cd to the root directory and perform a check  `npm run rebuild-ci [keyed|non-keyed]/[FrameworkName]`. It'll print an error if your framework doesn't build, the benchmark can't be run or behaves other as specified. It'll print a big ERROR explaining if it isn't happy with the implementation. Some common errors include:
+- **Please make sure your implementation is validated by the test tool.** cd to the root directory and perform a check `npm run rebuild-ci [keyed|non-keyed]/[FrameworkName]`. It'll print an error if your framework doesn't build, the benchmark can't be run or behaves other as specified. It'll print a big ERROR explaining if it isn't happy with the implementation. Some common errors include:
   - Your package.json is missing some required fields
   - Incorrect classification (Keyed/NonKeyed)
   - You have gzipped files in /dist (unfortunately the web server prefers these when they exist)
@@ -564,15 +546,21 @@ Thanks to Baptiste Augrain for making the benchmarks more sophisticated and addi
 Frameworks without significant activity on github or npm for more than a year will be removed (_automatic commits like dependabot and minor updates, like docs editions, are ignored_).
 
 ## 2023-12-10
+
 The following frameworks were archived after chrome 120. Their last results are included in [chrome 120 results](https://krausest.github.io/js-framework-benchmark/2023/table_chrome_120.0.6099.62.html).
+
 - [x] petite-vue
 
 ## 2023-11-07
+
 The following frameworks were archived after chrome 119. Their last results are included in [chrome 119 results](https://krausest.github.io/js-framework-benchmark/2023/table_chrome_119.0.6045.105.html).
+
 - [x] sifrr
 
 ## 2023-10-22
+
 The following frameworks were archived after chrome 118. Their last results are included in [chrome 118 results](https://krausest.github.io/js-framework-benchmark/2023/table_chrome_118.0.5993.70.html).
+
 - [x] 1more
 - [x] bdc
 - [x] choo
@@ -590,7 +578,6 @@ The following frameworks were archived after chrome 118. Their last results are 
 - [x] resonatejs
 - [x] sledgehammer
 - [x] uhydro
-
 
 ## 2020-7-9
 
@@ -613,4 +600,3 @@ The following frameworks were archived after chrome 118. Their last results are 
 - [x] maik-h Last commit Dec 15, 2017
 - [x] rivets Last commit Oct 22, 2016
 - [x] tsers. Last commit Jun 19, 2016
-
