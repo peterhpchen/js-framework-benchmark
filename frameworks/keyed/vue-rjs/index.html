@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Vue Render Function</title>
+    <link href="/css/currentStyle.css" rel="stylesheet" />
+    <script type="importmap">
+      {
+        "imports": {
+          "vue": "https://unpkg.com/vue@3/dist/vue.esm-browser.js"
+        }
+      }
+    </script>
+    <script type="module">
+      window.__modules__ = {};
+      if (window.__app__) {
+        window.__app__.unmount();
+      }
+    </script>
+    <script type="module">
+      import { ref, shallowRef, h } from "vue";
+      let ID = 1;
+      function _random(max) {
+        return Math.round(Math.random() * 1000) % max;
+      }
+      function buildData(count = 1000) {
+        const adjectives = [
+          "pretty",
+          "large",
+          "big",
+          "small",
+          "tall",
+          "short",
+          "long",
+          "handsome",
+          "plain",
+          "quaint",
+          "clean",
+          "elegant",
+          "easy",
+          "angry",
+          "crazy",
+          "helpful",
+          "mushy",
+          "odd",
+          "unsightly",
+          "adorable",
+          "important",
+          "inexpensive",
+          "cheap",
+          "expensive",
+          "fancy",
+        ];
+        const colours = [
+          "red",
+          "yellow",
+          "blue",
+          "green",
+          "pink",
+          "brown",
+          "purple",
+          "brown",
+          "white",
+          "black",
+          "orange",
+        ];
+        const nouns = [
+          "table",
+          "chair",
+          "house",
+          "bbq",
+          "desk",
+          "car",
+          "pony",
+          "cookie",
+          "sandwich",
+          "burger",
+          "pizza",
+          "mouse",
+          "keyboard",
+        ];
+        const data = [];
+        for (let i = 0; i < count; i++)
+          data.push({
+            id: ID++,
+            label:
+              adjectives[_random(adjectives.length)] +
+              " " +
+              colours[_random(colours.length)] +
+              " " +
+              nouns[_random(nouns.length)],
+          });
+        return data;
+      }
+      __modules__.APP_COMPONENT = {
+        setup() {
+          let selected = ref();
+          let rows = shallowRef([]);
+          function setRows(update = rows.value.slice()) {
+            rows.value = update;
+          }
+          function add() {
+            rows.value = rows.value.concat(buildData(1000));
+          }
+          function remove(id) {
+            rows.value.splice(
+              rows.value.findIndex((d) => d.id === id),
+              1
+            );
+            setRows();
+          }
+          function select(id) {
+            selected.value = id;
+          }
+          function run() {
+            setRows(buildData());
+            selected.value = undefined;
+          }
+          function update() {
+            const _rows = rows.value;
+            for (let i = 0; i < _rows.length; i += 10) {
+              _rows[i].label += " !!!";
+            }
+            setRows();
+          }
+          function runLots() {
+            setRows(buildData(10000));
+            selected.value = undefined;
+          }
+          function clear() {
+            setRows([]);
+            selected.value = undefined;
+          }
+          function swapRows() {
+            const _rows = rows.value;
+            if (_rows.length > 998) {
+              const d1 = _rows[1];
+              const d998 = _rows[998];
+              _rows[1] = d998;
+              _rows[998] = d1;
+              setRows();
+            }
+          }
+          return () => [
+            h("div", { class: "container" }, [
+              h("div", { class: "jumbotron" }, [
+                h("div", { class: "row" }, [
+                  h("div", { class: "col-md-6" }, [h("h1", null, "Vue RJS")]),
+                  h("div", { class: "col-md-6" }, [
+                    h("div", { class: "row" }, [
+                      h("div", { class: "col-sm-6 smallpad" }, [
+                        h(
+                          "button",
+                          { type: "button", class: "btn btn-primary btn-block", id: "run", onClick: run },
+                          " Create 1,000 rows "
+                        ),
+                      ]),
+                      h("div", { class: "col-sm-6 smallpad" }, [
+                        h(
+                          "button",
+                          { type: "button", class: "btn btn-primary btn-block", id: "runlots", onClick: runLots },
+                          " Create 10,000 rows "
+                        ),
+                      ]),
+                      h("div", { class: "col-sm-6 smallpad" }, [
+                        h(
+                          "button",
+                          { type: "button", class: "btn btn-primary btn-block", id: "add", onClick: add },
+                          " Append 1,000 rows "
+                        ),
+                      ]),
+                      h("div", { class: "col-sm-6 smallpad" }, [
+                        h(
+                          "button",
+                          { type: "button", class: "btn btn-primary btn-block", id: "update", onClick: update },
+                          " Update every 10th row "
+                        ),
+                      ]),
+                      h("div", { class: "col-sm-6 smallpad" }, [
+                        h(
+                          "button",
+                          { type: "button", class: "btn btn-primary btn-block", id: "clear", onClick: clear },
+                          " Clear "
+                        ),
+                      ]),
+                      h("div", { class: "col-sm-6 smallpad" }, [
+                        h(
+                          "button",
+                          { type: "button", class: "btn btn-primary btn-block", id: "swaprows", onClick: swapRows },
+                          " Swap Rows "
+                        ),
+                      ]),
+                    ]),
+                  ]),
+                ]),
+              ]),
+              h("table", { class: "table table-hover table-striped test-data" }, [
+                h(
+                  "tbody",
+                  null,
+                  rows.value.map(({ id, label }) => {
+                    return h("tr", { key: id, class: { danger: id === selected.value }, "data-label": label }, [
+                      h("td", { class: "col-md-1" }, id),
+                      h("td", { class: "col-md-4" }, [h("a", { onClick: () => select(id) }, label)]),
+                      h("td", { class: "col-md-1" }, [
+                        h("a", { onClick: () => remove(id) }, [
+                          h("span", { class: "glyphicon glyphicon-remove", "aria-hidden": "true" }),
+                        ]),
+                      ]),
+                      h("td", { class: "col-md-6" }),
+                    ]);
+                  })
+                ),
+              ]),
+              h("span", { class: "preloadicon glyphicon glyphicon-remove", "aria-hidden": "true" }, null),
+            ]),
+          ];
+        },
+      };
+    </script>
+    <script type="module">
+      import { createApp as _createApp } from "vue";
+      const _mount = () => {
+        const AppComponent = __modules__.APP_COMPONENT;
+        // AppComponent.mounted = () => {
+        //   // console.timeEnd('boot');
+        //   console.log('mounted');
+        // };
+        const app = (window.__app__ = _createApp(AppComponent));
+        app.mount("#app");
+      };
+      // console.time('boot');
+      _mount();
+    </script>
+  </head>
+  <body>
+    <div id="app"></div>
+  </body>
+</html>
